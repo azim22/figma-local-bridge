@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Figma Local Bridge</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;padding:22px;background:var(--figma-color-bg,#fff);color:var(--figma-color-text,#1f2328);font:13px/1.5 system-ui}h1{font-size:20px;margin:0 0 12px}#status{display:flex;align-items:center;gap:8px;font-weight:600}#dot{width:9px;height:9px;flex-shrink:0;border-radius:50%;background:#9a6700}#file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--figma-color-text-secondary,#5e656b);margin-top:8px}p{color:var(--figma-color-text-secondary,#5e656b);font-size:12px}button{border:0;background:var(--figma-color-bg-brand,#0969da);color:var(--figma-color-text-onbrand,#fff);font:600 13px system-ui;border-radius:6px;padding:10px 16px;cursor:pointer}button:focus-visible{outline:2px solid var(--figma-color-border-brand-strong,#0969da);outline-offset:3px}
+</style>
+</head>
+<body>
+<h1>Figma Local Bridge</h1>
+<div id="status" role="status"><span id="dot" aria-hidden="true"></span><span id="label">Connecting…</span></div>
+<div id="file"></div>
+<p>Keep this window open while your MCP client works with the design.</p>
+<button id="retry">Reconnect</button>
+<script>
+const config = __BRIDGE_CONFIG__;
+let socket, info, timer, stopped = false;
+const label=document.getElementById('label'),dot=document.getElementById('dot');
+function status(text,ok=false){label.textContent=text;dot.style.background=ok?'#1a7f37':'#9a6700'}
+function connect(){
+  clearTimeout(timer);
+  if(!info)return;
+  if(socket){socket.onclose=null;socket.close()}
+  status('Connecting…');
+  socket=new WebSocket(`ws://localhost:${config.port}/plugin`);
+  socket.onopen=()=>socket.send(JSON.stringify({type:'hello',token:config.token,documentId:info.documentId,name:info.name,page:info.page}));
+  socket.onmessage=e=>{
+    const data=JSON.parse(e.data);
+    if(data.type==='connected'){status('Connected to local bridge',true);return}
+    status('Working on the design…',true);
+    parent.postMessage({pluginMessage:{type:'command',command:data}},'*');
+  };
+  socket.onerror=()=>status('Local bridge unavailable');
+  socket.onclose=e=>{
+    stopped=e.code===1008||e.code===1011;
+    status(stopped ? (e.code===1011?'Timed out. Inspect the canvas before retrying.':e.reason||'Pairing rejected. Rebuild the plugin or close another connection.') : 'Waiting for local bridge…');
+    if(!stopped)timer=setTimeout(connect,2000);
+  };
+}
+window.onmessage=e=>{
+  if(e.source!==parent)return;
+  const data=e.data?.pluginMessage;if(!data)return;
+  if(data.type==='info'){info=data;document.getElementById('file').textContent=data.name;connect()}
+  if(data.type==='result'&&socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:data.id,result:data.result}));status(data.result?.error?'Command failed; inspect the canvas':'Connected to local bridge',!data.result?.error)}
+};
+document.getElementById('retry').onclick=()=>{stopped=false;connect()};
+parent.postMessage({pluginMessage:{type:'ready'}},'*');
+</script>
+</body>
+</html>

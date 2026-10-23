@@ -1,0 +1,7 @@
+.local/
+dist/
+node_modules/
+.env
+.env.*
+*.log
+*.tgz

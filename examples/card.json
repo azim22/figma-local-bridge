@@ -1,0 +1,23 @@
+{
+  "targetDocumentId": "REPLACE_WITH_DOCUMENT_ID",
+  "nodes": [
+    {
+      "type": "FRAME",
+      "key": "card",
+      "name": "Example card",
+      "x": 1000,
+      "y": 0,
+      "width": 320,
+      "layout": "VERTICAL",
+      "verticalSizing": "HUG",
+      "padding": 24,
+      "gap": 12,
+      "radius": 12,
+      "fill": "#FFFFFF",
+      "children": [
+        { "type": "TEXT", "text": "Hello from Figma Local Bridge", "fontFamily": "Inter", "fontStyle": "Regular", "fontSize": 24, "width": 272, "fill": "#111827" },
+        { "type": "TEXT", "text": "These are editable layers, not a screenshot.", "fontFamily": "Inter", "fontStyle": "Regular", "fontSize": 14, "width": 272, "fill": "#4B5563" }
+      ]
+    }
+  ]
+}
