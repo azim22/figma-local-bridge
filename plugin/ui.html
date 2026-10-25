@@ -39,13 +39,14 @@ function connect(){
   };
 }
 window.onmessage=e=>{
-  if(e.source!==parent)return;
   const data=e.data?.pluginMessage;if(!data)return;
+  if(e.source!==parent && !(e.source===top && e.origin==='https://www.figma.com'))return;
   if(data.type==='info'){info=data;document.getElementById('file').textContent=data.name;connect()}
   if(data.type==='result'&&socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:data.id,result:data.result}));status(data.result?.error?'Command failed; inspect the canvas':'Connected to local bridge',!data.result?.error)}
 };
 document.getElementById('retry').onclick=()=>{stopped=false;connect()};
 parent.postMessage({pluginMessage:{type:'ready'}},'*');
+status('Waiting for Figma…');
 </script>
 </body>
 </html>
