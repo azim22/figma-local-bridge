@@ -151,6 +151,7 @@ For foreground diagnostics, stop the background bridge first, then run `npm run 
 | Another plugin connected | Close the previous file's plugin before connecting another. |
 | Target document changed | Read `figma_document` again; use its new `documentId`. |
 | Missing font | Use `figma_fonts` to find an available exact family/style. |
+| Command failed, but bridge connected | The plugin shows the exact command error separately from the connection status. A failed read does not imply a disconnected bridge. Failed writes may have partially applied: inspect the canvas before retrying. |
 | Unable to establish connection to Figma after 10 seconds | A Figma API operation failed. Check `figma_status` before restarting the local bridge; it may still be connected. For a nested node, read its known parent first and use the exact returned child ID in the same plugin session. |
 | Timeout / partial error | The design may already have changed. Inspect it before reconnecting or retrying; never blindly replay a write. |
 | Bridge will not start | Read your private `.local/bridge.log`, redacting file/session data before sharing it. |
